@@ -1,0 +1,47 @@
+---
+title: "Travel Pricing Analysis"
+author: "Justin Ashton"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(vroom)
+library(dplyr)
+
+flights <- vroom(c("q1.csv", "q2.csv", "q3.csv", "q4.csv"))
+
+nrow(flights)
+glimpse(flights)
+```
+
+```{r}
+#Filter departures out of NYC area only
+nyc <- flights |>
+  filter(ORIGIN %in% c("JFK", "LGA", "EWR")) |>
+  filter(DEST_COUNTRY == "US") |>
+  filter(MARKET_FARE > 0) |>
+  filter(PASSENGERS > 0) |>
+  select(YEAR, QUARTER, ORIGIN, DEST, TICKET_CARRIER, 
+         MARKET_FARE, PASSENGERS, MARKET_DISTANCE)
+
+nrow(nyc)
+```
+
+```{r}
+#Filter outliers
+nyc <- nyc |>
+  filter(MARKET_FARE >= 30, MARKET_FARE <= 2000)
+
+summary(nyc$MARKET_FARE)
+nrow(nyc)
+```
+
+```{r}
+#Create csv file for Excel use
+write.csv(nyc, "nyc_flights_2024.csv", row.names = FALSE)
+```
+
